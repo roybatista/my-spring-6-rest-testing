@@ -1,7 +1,9 @@
 package guru.springframework.spring_6_rest_mvc.service;
 
+import guru.springframework.spring_6_rest_mvc.mapper.CustomerMapper;
 import guru.springframework.spring_6_rest_mvc.model.CustomerDTO;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Array;
@@ -49,7 +51,8 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public Optional<CustomerDTO> getCustomerById(UUID uuid) {
-        return Optional.empty();
+
+        return Optional.ofNullable((customerDTOHashMap.get(uuid)));
     }
 
     @Override
@@ -59,21 +62,23 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public CustomerDTO saveNewCustomer(CustomerDTO customer) {
-        return null;
+
+        return customerDTOHashMap.put(customer.getId(),customer);
     }
 
     @Override
     public void updateCustomerById(UUID customerId, CustomerDTO customer) {
-
+        customerDTOHashMap.put(customerId, customer);
     }
 
     @Override
     public void deleteCustomerById(UUID customerId) {
-
+        customerDTOHashMap.remove(customerId);
     }
 
     @Override
     public void patchCustomerById(UUID customerId, CustomerDTO customer) {
+
 
     }
 }
