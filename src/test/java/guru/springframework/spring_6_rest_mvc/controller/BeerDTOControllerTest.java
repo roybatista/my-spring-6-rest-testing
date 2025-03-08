@@ -2,7 +2,7 @@ package guru.springframework.spring_6_rest_mvc.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import guru.springframework.spring_6_rest_mvc.model.Beer;
+import guru.springframework.spring_6_rest_mvc.model.BeerDTO;
 import guru.springframework.spring_6_rest_mvc.service.BeerService;
 import guru.springframework.spring_6_rest_mvc.service.BeerServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Optional;
 import java.util.UUID;
 
 
@@ -23,13 +24,12 @@ import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(BeerController.class)
-class BeerControllerTest {
+class BeerDTOControllerTest {
 
     @Autowired
     MockMvc mockitoBean;
@@ -44,7 +44,7 @@ class BeerControllerTest {
     ArgumentCaptor<UUID> argumentUUIDCaptor;
 
     @Captor
-    ArgumentCaptor<Beer> beerArgumentCaptor;
+    ArgumentCaptor<BeerDTO> beerArgumentCaptor;
 
     BeerServiceImpl beerServiceImpl;
 
@@ -55,11 +55,11 @@ class BeerControllerTest {
 
     @Test
     void addBeer() throws Exception {
-        Beer beer = beerServiceImpl.getAllBeers().getFirst();
+        BeerDTO beer = beerServiceImpl.getAllBeers().getFirst();
         beer.setId(null);
         beer.setVersion(null);
 
-        given(beerService.createBeer(any(Beer.class))).willReturn(beerServiceImpl.getAllBeers().get(1));
+        given(beerService.createBeer(any(BeerDTO.class))).willReturn(beerServiceImpl.getAllBeers().get(1));
 
         mockitoBean.perform(post("/api/v1/add")
                         .accept(MediaType.APPLICATION_JSON)
@@ -72,7 +72,7 @@ class BeerControllerTest {
 
     @Test
     void deleteBeerTest() throws Exception {
-        Beer beer = beerServiceImpl.getAllBeers().getFirst();
+        BeerDTO beer = beerServiceImpl.getAllBeers().getFirst();
 
         mockitoBean.perform(delete("/api/v1/delete/beer/"+beer.getId())
                 .accept(MediaType.APPLICATION_JSON)
@@ -86,7 +86,7 @@ class BeerControllerTest {
 
     @Test
     void updateBeer() throws Exception {
-        Beer beer = beerServiceImpl.getAllBeers().getFirst();
+        BeerDTO beer = beerServiceImpl.getAllBeers().getFirst();
 
         mockitoBean.perform(put("/api/v1/update/"+beer.getId())
                 .accept(MediaType.APPLICATION_JSON)
@@ -94,12 +94,12 @@ class BeerControllerTest {
                 .content(objectMapper.writeValueAsString(beer)))
                 .andExpect(status().isNoContent());
 
-        verify(beerService).updateBeer(any(UUID.class), any(Beer.class));
+        verify(beerService).updateBeer(any(UUID.class), any(BeerDTO.class));
     }
 
     @Test
     void createNewBeer() throws JsonProcessingException {
-        Beer beer = beerServiceImpl.getAllBeers().getFirst();
+        BeerDTO beer = beerServiceImpl.getAllBeers().getFirst();
         System.out.println(objectMapper.writeValueAsString(beer));
     }
 
@@ -116,11 +116,19 @@ class BeerControllerTest {
     }
 
     @Test
+    void getBeetByIDNotFound() throws Exception {
+
+        given(beerService.getBeerById(any(UUID.class))).willThrow(NotFoundException.class);
+
+        mockitoBean.perform((get("/api/v1/beer/"+UUID.randomUUID()))).andExpect(status().isNotFound());
+    }
+
+    @Test
     void getBeerByID() throws Exception{
 
-        Beer testBeer = beerServiceImpl.getAllBeers().get(0);
+        BeerDTO testBeer = beerServiceImpl.getAllBeers().get(0);
 
-        given(beerService.getBeerById(testBeer.getId())).willReturn(testBeer);
+        given(beerService.getBeerById(testBeer.getId())).willReturn(Optional.of(testBeer));
 
         mockitoBean.perform(get("/api/v1/beer/" + testBeer.getId().toString())
                         .accept(MediaType.APPLICATION_JSON))

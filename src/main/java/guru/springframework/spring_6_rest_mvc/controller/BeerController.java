@@ -1,24 +1,20 @@
 package guru.springframework.spring_6_rest_mvc.controller;
 
-import com.sun.net.httpserver.Headers;
-import guru.springframework.spring_6_rest_mvc.model.Beer;
+import guru.springframework.spring_6_rest_mvc.model.BeerDTO;
 import guru.springframework.spring_6_rest_mvc.service.BeerService;
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.extern.log4j.Log4j;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
-@AllArgsConstructor
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1")
 public class BeerController {
@@ -26,31 +22,33 @@ public class BeerController {
     private final BeerService beerService;
 
     @GetMapping("/beer/{beerId}")
-    public Beer getBeerByID(@PathVariable("beerId") UUID id){
-        log.debug("Sending UUID: {}", id);
+    public BeerDTO getBeerByID(@PathVariable("beerId") UUID id){
 
-        return beerService.getBeerById(id);
+        log.info("Sending UUID");
+        //log.info("Sending UUID: {}", id);
+
+        return beerService.getBeerById(id).orElseThrow(NotFoundException::new);
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/beers")
     //@GetMapping("/beers")
-    public List<Beer> getBeers() {
+    public List<BeerDTO> getBeers() {
         return beerService.getAllBeers();
     }
 
     @PostMapping("/add")
-    public ResponseEntity addBeer(@RequestBody Beer beer){
+    public ResponseEntity addBeer(@RequestBody BeerDTO beer){
 
-        Beer newBeem = beerService.createBeer(beer);
+        BeerDTO newBeem = beerService.createBeer(beer);
 
         HttpHeaders headers = new HttpHeaders();
-        headers.add("location","/api/v1/beer/"+newBeem.getId().toString());
+        headers.add("location","/api/v1/beer/"+newBeem.getId());
 
         return new ResponseEntity(headers,HttpStatus.CREATED);
     }
 
     @PutMapping("/update/{beerID}")
-    public ResponseEntity updateBeer(@PathVariable("beerID") UUID id, @RequestBody Beer beer){
+    public ResponseEntity updateBeer(@PathVariable("beerID") UUID id, @RequestBody BeerDTO beer){
 
         beerService.updateBeer(id,beer);
 
@@ -65,5 +63,11 @@ public class BeerController {
         return new ResponseEntity(HttpStatus.NO_CONTENT);
 
     }
+
+//    @ExceptionHandler(NotFoundException.class)
+//    public ResponseEntity handleNotFoundException(){
+//        System.out.println("This is my Exception");
+//        return ResponseEntity.notFound().build();
+//    }
 
 }
