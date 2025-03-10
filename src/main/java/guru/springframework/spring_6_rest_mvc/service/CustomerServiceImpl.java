@@ -63,7 +63,18 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public CustomerDTO saveNewCustomer(CustomerDTO customer) {
 
-        return customerDTOHashMap.put(customer.getId(),customer);
+        System.out.println("New Customer: " + customer);
+
+        CustomerDTO newCustomer = CustomerDTO.builder()
+                .id(UUID.randomUUID())
+                .version(1)
+                .name(customer.getName())
+                .createdDate(LocalDateTime.now())
+                .updateDate(LocalDateTime.now())
+                .build();
+        System.out.println("New Customer: " + newCustomer);
+        customerDTOHashMap.put(newCustomer.getId(), newCustomer);
+        return newCustomer;
     }
 
     @Override
@@ -79,6 +90,25 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public void patchCustomerById(UUID customerId, CustomerDTO customer) {
 
+        CustomerDTO customerDTO = customerDTOHashMap.get(customerId);
 
+        if(customerDTO != null) {
+            if (customer.getId() != null && !customerDTO.getId().equals(customerId)) {
+                customerDTO.setId(customer.getId());
+            }
+            if (customer.getName() != null && !customerDTO.getName().equals(customer.getName())) {
+                customerDTO.setName(customer.getName());
+            }
+            if (customer.getVersion() != null && !customerDTO.getVersion().equals(customer.getVersion())) {
+                customerDTO.setVersion(customer.getVersion());
+            }
+            if (customer.getCreatedDate() != null && !customerDTO.getCreatedDate().equals(customer.getCreatedDate())) {
+                customerDTO.setCreatedDate(customer.getCreatedDate());
+            }
+            if (customer.getUpdateDate() != null && !customerDTO.getUpdateDate().equals(customer.getUpdateDate())) {
+                customerDTO.setUpdateDate(customer.getUpdateDate());
+            }
+        }
     }
+
 }

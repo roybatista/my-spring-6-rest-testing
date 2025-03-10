@@ -3,6 +3,7 @@ package guru.springframework.spring_6_rest_mvc.controller;
 
 import com.sun.net.httpserver.Headers;
 import guru.springframework.spring_6_rest_mvc.model.CustomerDTO;
+
 import guru.springframework.spring_6_rest_mvc.model.ResponseCustomer;
 import guru.springframework.spring_6_rest_mvc.service.CustomerService;
 import lombok.RequiredArgsConstructor;
@@ -45,18 +46,20 @@ public class CustomerController {
 
         CustomerDTO newCustomer = customerService.saveNewCustomer(customerDTO);
 
+        System.out.println("New Customer: " + newCustomer);
+
         Headers headers = new Headers();
         headers.add("location", URL_CUSTOMER+"/"+newCustomer.getId());
 
-        return new ResponseEntity<>(headers, HttpStatus.CREATED);
+       // return new ResponseEntity<>(headers, HttpStatus.CREATED);
 
-//        ResponseCustomer responseCustomer = ResponseCustomer.builder()
-//                .status("200")
-//                .discription("Customer Created")
-//                .customer(newCustomer)
-//                .build();
-//
-//        return new ResponseEntity<ResponseCustomer>(responseCustomer, HttpStatus.CREATED);
+        ResponseCustomer responseCustomer = ResponseCustomer.builder()
+                .status("200")
+                .discription("Customer Created")
+                .customer(newCustomer)
+                .build();
+
+        return new ResponseEntity<ResponseCustomer>(responseCustomer, HttpStatus.CREATED);
 
     }
 
